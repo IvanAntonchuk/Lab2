@@ -2,24 +2,17 @@ from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
 
 class HomePage(BasePage):
-    SEARCH_INPUT = (By.CSS_SELECTOR, 'input[placeholder="Місто, район, вулиця, ЖК"]')
-    SEARCH_BUTTON = (By.CSS_SELECTOR, 'button[type="submit"]')
-    CURRENCY_BUTTON = (By.XPATH, "//button[contains(text(), 'UAH') or contains(text(), 'USD')]")
-    CURRENCY_USD = (By.XPATH, "//li[contains(text(), 'USD')]")
+    def __init__(self, driver):
+        super().__init__(driver)
+        self.url = "https://lun.ua/uk/"
+
+    SEARCH_INPUT = (By.NAME, "query")
+    SEARCH_BUTTON = (By.CSS_SELECTOR, "button[type='submit']")
 
     def open(self):
-        """Відкриває головну сторінку LUN"""
-        self.open_page()
+        self.driver.get(self.url)
 
-    def enter_search_keyword(self, keyword):
-        """Вводить текст у головний рядок пошуку"""
-        self.enter_text(self.SEARCH_INPUT, keyword)
-
-    def click_search(self):
-        """Натискає кнопку пошуку"""
-        self.click_element(self.SEARCH_BUTTON)
-
-    def change_currency_to_usd(self):
-        """Перемикає валюту на долари"""
-        self.click_element(self.CURRENCY_BUTTON)
-        self.click_element(self.CURRENCY_USD)
+    def search_for(self, text):
+        """Об'єднаний метод пошуку через JS"""
+        self.js_type(self.SEARCH_INPUT, text)
+        self.js_click(self.SEARCH_BUTTON)

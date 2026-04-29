@@ -1,32 +1,23 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
-        self.base_url = "https://lun.ua/"
+        self.wait = WebDriverWait(self.driver, 20)
 
-    def open_page(self):
-        """Відкриває головну сторінку"""
-        self.driver.get(self.base_url)
+    def find_element(self, locator):
+        return self.wait.until(EC.presence_of_element_located(locator))
 
-    def find_element(self, locator, time=10):
-        """Шукає елемент на сторінці з очікуванням до 10 секунд"""
-        return WebDriverWait(self.driver, time).until(
-            EC.presence_of_element_located(locator),
-            message=f"Не зміг знайти елемент за локатором {locator}"
-        )
+    def js_click(self, locator):
+        """Клік через JavaScript (ігнорує перекриття іншими вікнами)"""
+        element = self.find_element(locator)
+        self.driver.execute_script("arguments[0].click();", element)
 
-    def click_element(self, locator, time=10):
-        """Шукає елемент і клікає на нього"""
-        element = WebDriverWait(self.driver, time).until(
-            EC.element_to_be_clickable(locator),
-            message=f"Елемент не клікабельний {locator}"
-        )
-        element.click()
-
-    def enter_text(self, locator, text, time=10):
-        """Шукає поле і вводить туди текст"""
-        element = self.find_element(locator, time)
-        element.clear()
-        element.send_keys(text)
+    def js_type(self, locator, text):
+        """Ввід тексту через JavaScript (найшвидший і найнадійніший спосіб)"""
+        element = self.find_element(locator)
+        self.driver.execute_script("arguments[0].value = '';", element)
+        self.driver.execute_script(f"arguments[0].value = '{text}';", element)
+        self.driver.execute_script("arguments[0].dispatchEvent(new Event('input', { bubbles: True }));", element)
